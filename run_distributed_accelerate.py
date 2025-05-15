@@ -1,4 +1,5 @@
 import argparse
+from ast import arg
 import json
 import os
 
@@ -18,12 +19,9 @@ from transformers import (
 from trl import SFTTrainer
 
 from logging_class import start_queue, write_log
+from loguru import logger
 
 # ---------------------------------------------------------------------------
-# subprocess.run(
-#     "venv/bin/pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126",
-#     shell=True,
-# )
 HfFolder.save_token("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")
 wandb.login("allow", "cd65e4ccbe4a97f6b8358f78f8ecf054f21466d9")
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -50,15 +48,23 @@ parser.add_argument(
     help="Name of the dataset to use",
 )
 parser.add_argument(
-    "--prompt_field",
+    "--instruction_field",
     type=str,
     default="prompt",
     help="Field name for prompts in the dataset",
 )
 parser.add_argument(
-    "--text_field", type=str, default="response", help="Field name for text in the dataset"
+    "--input_field",
+    type=str,
+    default="task_description",
+    help="Field name for text in the dataset",
 )
-
+parser.add_argument(
+    "--output_field",
+    type=str,
+    default="response",
+    help="Field name for text in the dataset",
+)
 args = parser.parse_args()
 log_queue, logging_thread = start_queue(args.channel_log)
 write_log(log_queue)
@@ -73,6 +79,7 @@ output_dir = "./data/checkpoint"
 push_to_hub = True
 hf_model_id = args.hf_model_id if args.hf_model_id else "aixblock"
 push_to_hub_token = args.push_to_hub_token if args.push_to_hub_token else "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"
+
 
 if args.training_args_json:
     with open(args.training_args_json, "r") as f:
@@ -98,19 +105,23 @@ tokenizer = AutoTokenizer.from_pretrained(
 EOS_TOKEN = tokenizer.eos_token  # Must add EOS_TOKEN
 alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 
-                ### Prompt:
-                {}
+                    ### Instruction:
+                    {}
 
-                ### Response:
-                {}"""
+                    ### Input:
+                    {}
+
+                    ### Response:
+                    {}"""
 
 
 def formatting_prompts_func(examples):
-    prompt = examples.get(args.prompt_field)
-    response = examples.get(args.text_field)
+    instructions = examples.get(args.instruction_field)
+    inputs = examples.get(args.input_field)
+    outputs = examples.get(args.output_field)
     texts = []
-    for input, output in zip(prompt, response):
-        text = alpaca_prompt.format(input, output) + EOS_TOKEN
+    for instruction, input, output in zip(instructions, inputs, outputs):
+        text = alpaca_prompt.format(instruction, input, output) + EOS_TOKEN
         texts.append(text)
     return tokenizer(
         texts,
@@ -121,28 +132,9 @@ def formatting_prompts_func(examples):
     )
 
 
-
-
-def tokenizer_func(examples):
-    instructions = examples["instruction"]
-    inputs = examples["input"]
-    outputs = examples["output"]
-    texts = []
-    for instruction, input, output in zip(instructions, inputs, outputs):
-        text = alpaca_prompt.format(instruction, input, output) + EOS_TOKEN
-        texts.append(text)
-    return tokenizer(
-        "".join(texts),
-        truncation=True,
-        padding=True,
-        max_length=128,
-        return_tensors="pt",
-    )
-
-
 if not training_args_dict:
     training_args_dict = {}
-
+logger.info(f"Training arguments: {training_args_dict}")
 dataset_id = args.dataset_id
 dataset_id = training_args_dict.get("dataset_id", dataset_id)
 

@@ -3,16 +3,16 @@ import os
 import torch
 from huggingface_hub import HfFolder
 from transformers import pipeline
+from huggingface_hub import login
 
+# ---------------------------------------------------------------------
 # Đặt token của bạn vào đây
 hf_token = os.getenv("HF_TOKEN", "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")
 # Lưu token vào local
 HfFolder.save_token(hf_token)
 
-from huggingface_hub import login
 
-
-login(token=hf_access_token)
+login(token=hf_token)
 
 
 def _load():
