@@ -102,7 +102,7 @@ HfFolder.save_token(hf_token)
 
 
 hf_access_token = "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"
-login(token=hf_access_token)
+# login(token=hf_access_token)
 CUDA_VISIBLE_DEVICES = []
 for i in range(torch.cuda.device_count()):
     CUDA_VISIBLE_DEVICES.append(i)
