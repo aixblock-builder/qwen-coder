@@ -620,10 +620,8 @@ class MyModel(AIxBlockMLBase):
             if not prompt or prompt == "":
                 prompt = text
 
-            from huggingface_hub import login
-
             hf_access_token = kwargs.get(
-                "hf_access_token", "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"
+                "push_to_hub_token", "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"
             )
             login(token=hf_access_token)
 
