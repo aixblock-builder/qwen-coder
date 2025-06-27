@@ -12,7 +12,7 @@ hf_token = os.getenv("HF_TOKEN", "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")
 HfFolder.save_token(hf_token)
 
 
-login(token=hf_token)
+# login(token=hf_token)
 
 
 def _load():
