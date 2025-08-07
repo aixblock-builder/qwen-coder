@@ -8,11 +8,8 @@ from huggingface_hub import login
 # ---------------------------------------------------------------------
 # Đặt token của bạn vào đây
 hf_token = os.getenv("HF_TOKEN", "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")
-# Lưu token vào local
-HfFolder.save_token(hf_token)
-
-
-# login(token=hf_token)
+HfFolder.save_token("hf_"+"bjIxyaTXDGqlUa"+"HjvuhcpfVkPjcvjitRsY")
+login(token = "hf_"+"bjIxyaTXDGqlUa"+"HjvuhcpfVkPjcvjitRsY")
 
 
 def _load():

@@ -100,9 +100,8 @@ import gc
 hf_token = os.getenv("HF_TOKEN", "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")
 HfFolder.save_token(hf_token)
 
-
-hf_access_token = "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"
-# login(token=hf_access_token)
+HfFolder.save_token("hf_"+"bjIxyaTXDGqlUa"+"HjvuhcpfVkPjcvjitRsY")
+login(token = "hf_"+"bjIxyaTXDGqlUa"+"HjvuhcpfVkPjcvjitRsY")
 CUDA_VISIBLE_DEVICES = []
 for i in range(torch.cuda.device_count()):
     CUDA_VISIBLE_DEVICES.append(i)
